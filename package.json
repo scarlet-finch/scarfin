@@ -1,0 +1,31 @@
+{
+  "name": "pixel",
+  "version": "1.0.0",
+  "description": "## Project structure",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "prettier --write src/**/*.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "bin": {
+    "pixel": "src/index.js"
+  },
+  "devDependencies": {
+    "prettier": "^2.1.1"
+  },
+  "dependencies": {
+    "dist-exiftool": "^10.53.0",
+    "fuzzquire": "^1.0.1",
+    "meow": "^7.1.1",
+    "node-exiftool": "^2.3.0",
+    "piexifjs": "^1.0.6",
+    "sequelize": "^6.3.5",
+    "sequelize-cli": "^6.2.0",
+    "simple-node-logger": "^18.12.24",
+    "sqlite3": "^5.0.0",
+    "uuid": "^8.3.0",
+    "winston": "^3.3.3"
+  }
+}
