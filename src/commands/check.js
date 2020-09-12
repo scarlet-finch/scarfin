@@ -15,9 +15,18 @@ module.exports = async (opts) => {
             const metadata = await ep.readMetadata(file, ['-File:all']);
             const primary = metadata.data[0].ImageUniqueID;
             const backup = metadata.data[0].DocumentName;
-            const status = primary === backup ? 'backup matches' : backup;
+            const backup_status = primary === backup;
+            let db_file = null;
+            if (primary) {
+                db_file = await db.Files.findOne({
+                    where: { uuid: primary.replace('uuid:', '') },
+                });
+            }
+            const db_status = db_file !== null;
+            const file_status = db_status ? db_file.path === file : false;
 
-            _logger.debug(`${primary} (${status}) - ${file}`);
+            const statuses = `${backup_status} ${db_status} ${file_status}`;
+            _logger.debug(`${primary} (${statuses}) - ${file}`);
             if (!primary && backup) {
                 _logger.fatal(`primary uuid missing for: ${file}`);
                 continue;
@@ -27,13 +36,22 @@ module.exports = async (opts) => {
                 continue;
             }
             if (!backup && !primary) {
-                _logger.fatal(`uuids missing for: ${file}`);
+                _logger.alert(`unsynced file: ${file}`);
                 continue;
             }
             if (primary !== backup) {
                 _logger.fatal(
                     `uuid mismatch between primary and backup for: ${file}`
                 );
+                continue;
+            }
+            if (!db_status) {
+                _logger.fatal(`database row missing for: ${file}`);
+                continue;
+            }
+            if (!file_status) {
+                _logger.alert(`file moved from original location: ${file}`);
+                _logger.alert(`                     database has: ${db_file.path}`);
                 continue;
             }
             file_okay_count++;
@@ -46,6 +64,8 @@ module.exports = async (opts) => {
             _logger.notice(msg);
         }
     } catch (e) {
+        console.error(e);
         _logger.error(e);
+        process.exit(1);
     }
 };

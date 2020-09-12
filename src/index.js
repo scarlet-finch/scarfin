@@ -10,8 +10,8 @@ const cli = meow(
       $ pixel <command> -- <files>
 
     Commands
-      - sync
-      - test
+      - sync -- <files> - add or update images
+      - check -- <files> - check status of images
 
     Options
       (nothing here yet)
@@ -43,11 +43,14 @@ if (cli.flags.verbose) {
     global._logger = logger;
 }
 
-const commands = ['sync, test'];
+const commands = ['sync, check'];
 
 switch (command) {
     case 'sync':
         fq('sync')(files);
+        break;
+    case 'check':
+        fq('check')(files);
         break;
     case 'test':
         fq('test')(files);
@@ -56,5 +59,3 @@ switch (command) {
         _logger.alert(`unknown command: ${command}`);
         _logger.alert(`valid commands are: ${commands}`)
 }
-
-// console.log(cli.input, cli.flags);
