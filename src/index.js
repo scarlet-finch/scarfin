@@ -78,6 +78,9 @@ const main = async () => {
         case 'housekeep':
             fq('commands/housekeep')(files, cli.flags);
             break;
+        case 'mount':
+            fq('commands/mount')(files, cli.flags);
+            break;
         case 'test':
             fq('test')(files, cli.flags);
             break;

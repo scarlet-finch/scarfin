@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "dist-exiftool": "^10.53.0",
+    "filelink": "^4.1.1",
     "fuzzquire": "^1.0.1",
     "glob": "^7.1.6",
     "meow": "^7.1.1",
