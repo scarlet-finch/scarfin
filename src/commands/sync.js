@@ -134,7 +134,10 @@ const maybe_write_exif_rows = async (metadata_list) => {
                 _logger.debug(`written exif row for: ${e.path}`);
             } else {
                 // TODO: check for conflicts
-                if (JSON.stringify(exif_row.data) === JSON.stringify(e.metadata.data[0])) {
+                if (
+                    JSON.stringify(exif_row.data) ===
+                    JSON.stringify(e.metadata.data[0])
+                ) {
                     continue;
                 }
                 exif_row.data = e.metadata.data[0];

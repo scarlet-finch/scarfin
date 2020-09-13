@@ -25,9 +25,16 @@ module.exports = async (opts) => {
     let num_files = 0;
     let db_size = 0;
     let num_devices = 0;
+    let num_tags = 0;
+    let num_tag_pairs = 0;
     try {
         num_files = await db.Files.count();
         num_devices = await db.Devices.count();
+        num_tags = await db.TagPairs.count({
+            distinct: true,
+            col: 'tag',
+        });
+        num_tag_pairs = await db.TagPairs.count();
         const stats = fs.statSync(db_config[env].storage);
         //Convert the file size to megabytes
         db_size = stats['size'] / (1024 * 1024);
@@ -39,5 +46,7 @@ module.exports = async (opts) => {
     }
     _logger.notice(`files tracked: ${num_files}`);
     _logger.notice(`devices tracked: ${num_devices}`);
+    _logger.notice(`unique tags: ${num_tags}`);
+    _logger.notice(`file:tag pairs: ${num_tag_pairs}`);
     _logger.notice(`database size: ${db_size.toFixed(3)} MB`);
 };

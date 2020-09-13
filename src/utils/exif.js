@@ -33,6 +33,30 @@ const get_exif = async (ep, file) => {
     return metadata;
 };
 
+const get_uuids = async (files) => {
+    await ep.open();
+    const uuids = [];
+    for (file of files) {
+        const metadata = await get_exif(ep, file);
+        if (metadata === false) {
+            _logger.fatal(`no metadata for: ${file}`);
+            process.exit(1);
+        }
+        let existing_uuid = metadata.data[0].ImageUniqueID.replace('uuid:', '');
+        if (existing_uuid && !uuid.validate(existing_uuid)) {
+            _logger.fatal(`invalid uuid '${existing_uuid}'in file: ${file}`);
+            process.exit(1);
+        }
+        if (!existing_uuid) {
+            _logger.fatal(`no uuid for: ${file}`);
+            process.exit(1);
+        }
+        uuids.push(existing_uuid);
+    }
+    await ep.close();
+    return uuids;
+};
+
 const handle_file = async (ep, file) => {
     const metadata = await get_exif(ep, file);
     if (metadata === false) {
@@ -83,11 +107,12 @@ const read_write_uuid_info = async (opts) => {
             }
             metadata_list.push(metadata_info);
         }
-        _logger.info(`exiftool process stopped`);
     } catch (e) {
         _logger.error(e);
+    } finally {
+        await ep.close();
+        _logger.info(`exiftool process stopped`);
     }
-    ep.close();
     return {
         metadata_list,
         write_count,
@@ -97,4 +122,5 @@ const read_write_uuid_info = async (opts) => {
 module.exports = {
     read_write_uuid_info,
     get_exif,
+    get_uuids,
 };

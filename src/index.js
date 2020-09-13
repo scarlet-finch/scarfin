@@ -65,8 +65,13 @@ const main = async () => {
         case 'status':
             fq('status')(files, cli.flags);
             break;
+        case 'device':
         case 'devices':
             fq('commands/devices')(files, cli.flags);
+            break;
+        case 'tag':
+        case 'tags':
+            fq('commands/tags')(files, cli.flags);
             break;
         case 'test':
             fq('test')(files, cli.flags);
