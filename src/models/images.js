@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             name: DataTypes.STRING,
             album: DataTypes.STRING,
             device_id: DataTypes.INTEGER,
+            date_taken: DataTypes.DATE,
         },
         {
             sequelize,

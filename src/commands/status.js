@@ -44,9 +44,9 @@ module.exports = async (opts) => {
         _logger.error(e, e);
         process.exit(1);
     }
-    _logger.notice(`files tracked: ${num_files}`);
-    _logger.notice(`devices tracked: ${num_devices}`);
-    _logger.notice(`unique tags: ${num_tags}`);
-    _logger.notice(`file:tag pairs: ${num_tag_pairs}`);
-    _logger.notice(`database size: ${db_size.toFixed(3)} MB`);
+    _logger.notice(`files tracked:    ${num_files}`);
+    _logger.notice(`devices tracked:  ${num_devices}`);
+    _logger.notice(`unique tags:      ${num_tags}`);
+    _logger.notice(`file:tag pairs:   ${num_tag_pairs}`);
+    _logger.notice(`database size:    ${db_size.toFixed(3)} MB`);
 };

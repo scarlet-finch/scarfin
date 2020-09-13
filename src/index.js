@@ -45,11 +45,13 @@ const main = async () => {
     let logger;
     if (cli.flags.verbose) {
         logger = fq('logger')('debug');
-        global._logger = logger;
     } else {
         logger = fq('logger')('success');
-        global._logger = logger;
     }
+    global._logger = logger;
+
+    const config = fq('config_loader');
+    global._config = config;
 
     await migrate(); // Apply pending db migrations
 
@@ -72,6 +74,9 @@ const main = async () => {
         case 'tag':
         case 'tags':
             fq('commands/tags')(files, cli.flags);
+            break;
+        case 'housekeep':
+            fq('commands/housekeep')(files, cli.flags);
             break;
         case 'test':
             fq('test')(files, cli.flags);

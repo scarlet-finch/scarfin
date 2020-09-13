@@ -20,6 +20,7 @@
     "fuzzquire": "^1.0.1",
     "glob": "^7.1.6",
     "meow": "^7.1.1",
+    "moment": "^2.28.0",
     "node-exiftool": "^2.3.0",
     "piexifjs": "^1.0.6",
     "sequelize": "^6.3.5",
