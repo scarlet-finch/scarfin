@@ -25,7 +25,7 @@ const get_exif = async (ep, file) => {
         _logger.error(`file not found: ${file}`);
         return false;
     }
-    const metadata = await ep.readMetadata(file, ['-File:all']);
+    const metadata = await ep.readMetadata(file, ['c "%.6f"']);
     if (!metadata.data || metadata.data[0].Error) {
         _logger.error(`no exif metadata in file: ${file}`);
         return false;
@@ -53,18 +53,20 @@ const handle_file = async (ep, file) => {
         return {
             path: file,
             uuid: new_uuid,
+            metadata: metadata,
         };
     } else {
         _logger.debug(`---- found uuid for: ${file}`);
         return {
             path: file,
             uuid: existing_uuid,
+            metadata: metadata,
         };
     }
 };
 
 module.exports = async (opts) => {
-    const uuid_list = [];
+    const metadata_list = [];
     write_count = 0;
     try {
         const data = {
@@ -74,12 +76,12 @@ module.exports = async (opts) => {
         const pid = await ep.open();
         _logger.info(`exiftool process started as ${pid}`);
         for (file of opts) {
-            const uuid_info = await handle_file(ep, file);
-            if (uuid_info === false) {
+            const metadata_info = await handle_file(ep, file);
+            if (metadata_info === false) {
                 // something wrong happened; leave it.
                 continue;
             }
-            uuid_list.push(uuid_info);
+            metadata_list.push(metadata_info);
         }
         _logger.info(`exiftool process stopped`);
     } catch (e) {
@@ -87,7 +89,7 @@ module.exports = async (opts) => {
     }
     ep.close();
     return {
-        uuid_list,
+        metadata_list,
         write_count,
     };
 };

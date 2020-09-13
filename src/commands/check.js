@@ -6,13 +6,13 @@ const fq = require('fuzzquire');
 const path = fq('paths');
 const db = fq('models');
 
-module.exports = async (opts) => {
+module.exports = async (opts, flags) => {
     let file_okay_count = 0;
     try {
         opts = path(opts);
         const pid = await ep.open();
         for (file of opts) {
-            const metadata = await ep.readMetadata(file, ['-File:all']);
+            const metadata = await ep.readMetadata(file, ['c "%.6f"']);
             const primary = metadata.data[0].ImageUniqueID;
             const backup = metadata.data[0].DocumentName;
             const backup_status = primary === backup;
@@ -27,6 +27,10 @@ module.exports = async (opts) => {
 
             const statuses = `${backup_status} ${db_status} ${file_status}`;
             _logger.debug(`${primary} (${statuses}) - ${file}`);
+            if (flags.metadata) {
+                _logger.notice(`metadata for ${file}`);
+                console.log(metadata.data[0]);
+            }
             if (!primary && backup) {
                 _logger.fatal(`primary uuid missing for: ${file}`);
                 continue;
@@ -51,14 +55,16 @@ module.exports = async (opts) => {
             }
             if (!file_status) {
                 _logger.alert(`file moved from original location: ${file}`);
-                _logger.alert(`                     database has: ${db_file.path}`);
+                _logger.alert(
+                    `                     database has: ${db_file.path}`
+                );
                 continue;
             }
             file_okay_count++;
         }
         ep.close();
         const msg = `${file_okay_count}/${opts.length} files are ok`;
-        if (file_okay_count === opts.length) {
+        if (file_okay_count === opts.length && opts.length > 0) {
             _logger.success(msg);
         } else {
             _logger.notice(msg);
