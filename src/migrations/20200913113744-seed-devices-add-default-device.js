@@ -1,12 +1,14 @@
 'use strict';
 
+// We shall use migrations instead of seeders so umzug can automatically
+// apply these on startup.
+
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        // Add seed commands here.
-        const device = await queryInterface.bulkInsert('Devices', [
+        await queryInterface.bulkInsert('Devices', [
             {
                 id: 0,
-                name: 'unknown',
+                name: 'default',
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },
@@ -14,7 +16,6 @@ module.exports = {
     },
 
     down: async (queryInterface, Sequelize) => {
-        // Add commands to revert seed here.
-        await queryInterface.bulkDelete('Devices', null, {});
+        // No need to revert this.
     },
 };
