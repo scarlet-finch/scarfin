@@ -3,9 +3,11 @@
 const meow = require('meow');
 const fq = require('fuzzquire');
 const winston = require('winston');
+const migrate = fq('migrate');
 
-const cli = meow(
-    `
+const main = async () => {
+    const cli = meow(
+        `
     Usage
       $ pixel <command> -- <files>
 
@@ -22,52 +24,57 @@ const cli = meow(
           success: synced 90 files
           notice: added 3 new files
 `,
-    {
-        flags: {
-            verbose: {
-                type: 'boolean',
-                alias: 'v',
-                default: false,
+        {
+            flags: {
+                verbose: {
+                    type: 'boolean',
+                    alias: 'v',
+                    default: false,
+                },
+                metadata: {
+                    type: 'boolean',
+                    alias: 'm',
+                    default: false,
+                },
             },
-            metadata: {
-                type: 'boolean',
-                alias: 'm',
-                default: false,
-            },
-        },
+        }
+    );
+
+    const [command, ...files] = cli.input;
+
+    let logger;
+    if (cli.flags.verbose) {
+        logger = fq('logger')('debug');
+        global._logger = logger;
+    } else {
+        logger = fq('logger')('success');
+        global._logger = logger;
     }
-);
 
-const [command, ...files] = cli.input;
+    await migrate(); // Apply pending db migrations
 
-let logger;
-if (cli.flags.verbose) {
-    logger = fq('logger')('debug');
-    global._logger = logger;
-} else {
-    logger = fq('logger')('success');
-    global._logger = logger;
-}
+    const commands = ['sync, check'];
 
-const commands = ['sync, check'];
+    switch (command) {
+        case 'sync':
+            fq('sync')(files, cli.flags);
+            break;
+        case 'check':
+            fq('check')(files, cli.flags);
+            break;
+        case 'status':
+            fq('status')(files, cli.flags);
+            break;
+        case 'devices':
+            fq('commands/devices')(files, cli.flags);
+            break;
+        case 'test':
+            fq('test')(files, cli.flags);
+            break;
+        default:
+            _logger.alert(`unknown command: ${command}`);
+            _logger.alert(`valid commands are: ${commands}`);
+    }
+};
 
-switch (command) {
-    case 'sync':
-        fq('sync')(files, cli.flags);
-        break;
-    case 'check':
-        fq('check')(files, cli.flags);
-        break;
-    case 'status':
-        fq('status')(files, cli.flags);
-        break;
-    case 'devices':
-        fq('commands/devices')(files, cli.flags);
-        break;
-    case 'test':
-        fq('test')(files, cli.flags);
-        break;
-    default:
-        _logger.alert(`unknown command: ${command}`);
-        _logger.alert(`valid commands are: ${commands}`);
-}
+main();
