@@ -27,15 +27,18 @@ const umzug = new Umzug({
 module.exports = async () => {
     try {
         if (!fs.existsSync(config.storage)) {
-            _logger.alert(`database missing. creating new at: ${config.storage}`);
+            _logger.alert(
+                `database missing. creating new at: ${config.storage}`
+            );
         }
         const pending = await umzug.pending();
         if (pending.length > 0) {
-            _logger.alert(`applying ${pending.length} pending database migrations`);
+            _logger.alert(
+                `applying ${pending.length} pending database migrations`
+            );
             await umzug.up();
-            _logger.success(`database migrated`)
+            _logger.success(`database migrated`);
         }
-        
     } catch (err) {
         console.error(err);
         _logger.fatal('database migration failed');

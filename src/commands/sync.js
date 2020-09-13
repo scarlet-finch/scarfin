@@ -112,7 +112,39 @@ const maybe_write_image_rows = async (metadata_list) => {
         }
     } catch (e) {
         console.error(e);
-        _logger.error('error syncing device info');
+        _logger.error('database error');
+        process.exit();
+    }
+};
+
+const maybe_write_exif_rows = async (metadata_list) => {
+    try {
+        for (e of metadata_list) {
+            const exif_row = await db.Exifs.findOne({
+                where: {
+                    uuid: e.uuid,
+                },
+            });
+            if (exif_row === null) {
+                // create new
+                await db.Exifs.create({
+                    uuid: e.uuid,
+                    data: e.metadata.data[0],
+                });
+                _logger.debug(`written exif row for: ${e.path}`);
+            } else {
+                // TODO: check for conflicts
+                if (JSON.stringify(exif_row.data) === JSON.stringify(e.metadata.data[0])) {
+                    continue;
+                }
+                exif_row.data = e.metadata.data[0];
+                await exif_row.update();
+                _logger.debug(`updated exif row for: ${e.path}`);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+        _logger.error('database error');
         process.exit();
     }
 };
@@ -126,7 +158,6 @@ const handle_files = async (filepaths, flags) => {
     );
 
     // 2. Ensure files are in files table.
-
     const { db_add_count, db_update_count } = await write_multiple_files(
         metadata_list
     );
@@ -137,12 +168,15 @@ const handle_files = async (filepaths, flags) => {
     // 4. Ensure files have a row in images table.
     await maybe_write_image_rows(metadata_list);
 
-    // 5. Log final stats.
-    _logger.success(`synced ${metadata_list.length}/${filepaths.length} files`);
+    // 5. Copy all EXIF into our database to query headless.
+    await maybe_write_exif_rows(metadata_list);
+
+    // 6. Log final stats.
     _logger.notice(`written ${write_count} new files`);
     _logger.notice(`created ${db_add_count} new db rows`);
     _logger.notice(`updated ${db_update_count} db rows`);
     _logger.notice(`added ${device_add_count} new devices`);
+    _logger.success(`synced ${metadata_list.length}/${filepaths.length} files`);
 };
 
 module.exports = async (filepaths, flags) => {

@@ -34,7 +34,7 @@ module.exports = async (opts) => {
         await print_raw_tables(db);
     } catch (e) {
         console.log(e);
-        _logger.error(e);
+        _logger.error(e, e);
         process.exit(1);
     }
     _logger.notice(`files tracked: ${num_files}`);
