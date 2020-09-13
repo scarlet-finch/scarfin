@@ -65,7 +65,7 @@ const handle_file = async (ep, file) => {
     }
 };
 
-module.exports = async (opts) => {
+const read_write_uuid_info = async (opts) => {
     const metadata_list = [];
     write_count = 0;
     try {
@@ -92,4 +92,9 @@ module.exports = async (opts) => {
         metadata_list,
         write_count,
     };
+};
+
+module.exports = {
+    read_write_uuid_info,
+    get_exif,
 };

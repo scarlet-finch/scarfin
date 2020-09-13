@@ -61,6 +61,9 @@ switch (command) {
     case 'status':
         fq('status')(files, cli.flags);
         break;
+    case 'devices':
+        fq('commands/devices')(files, cli.flags);
+        break;
     case 'test':
         fq('test')(files, cli.flags);
         break;

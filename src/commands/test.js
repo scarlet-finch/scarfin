@@ -9,43 +9,22 @@ const db = fq('models');
 module.exports = async (opts) => {
     let file_okay_count = 0;
     try {
-        opts = path(opts);
-        const pid = await ep.open();
-        for (file of opts) {
-            const metadata = await ep.readMetadata(file, ['-File:all']);
-            const primary = metadata.data[0].ImageUniqueID;
-            const backup = metadata.data[0].DocumentName;
-            const status = primary === backup ? 'backup matches' : backup;
-
-            _logger.debug(`${primary} (${status}) - ${file}`);
-            if (!primary && backup) {
-                _logger.fatal(`primary uuid missing for: ${file}`);
-                continue;
-            }
-            if (!backup && primary) {
-                _logger.fatal(`backup uuid missing for: ${file}`);
-                continue;
-            }
-            if (!backup && !primary) {
-                _logger.fatal(`uuids missing for: ${file}`);
-                continue;
-            }
-            if (primary !== backup) {
-                _logger.fatal(
-                    `uuid mismatch between primary and backup for: ${file}`
+        const tables = await db.sequelize.getQueryInterface().showAllSchemas();
+        console.log(tables);
+        _logger.debug(`raw tables`);
+        for (table of tables) {
+            const fields = await db.sequelize
+                .getQueryInterface()
+                .describeTable(table.name);
+            _logger.debug(`    - table: ${table.name}`);
+            for (key in fields) {
+                _logger.debug(
+                    `        - ${key} - ${JSON.stringify(fields[key])}`
                 );
-                continue;
             }
-            file_okay_count++;
-        }
-        ep.close();
-        const msg = `${file_okay_count}/${opts.length} files are ok`;
-        if (file_okay_count === opts.length) {
-            _logger.success(msg);
-        } else {
-            _logger.notice(msg);
         }
     } catch (e) {
+        console.log(e);
         _logger.error(e);
     }
 };

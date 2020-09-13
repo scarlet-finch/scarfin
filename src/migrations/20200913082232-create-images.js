@@ -1,21 +1,32 @@
 'use strict';
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('Files', {
+        await queryInterface.createTable('Images', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
-            path: {
-                allowNull: false,
-                type: Sequelize.STRING(10000), // max linux path length
-            },
             uuid: {
-                allowNull: false,
                 type: Sequelize.UUID,
-                unique: true,
+                references: {
+                    model: 'Files',
+                    key: 'uuid',
+                },
+            },
+            name: {
+                type: Sequelize.STRING,
+            },
+            album: {
+                type: Sequelize.STRING,
+            },
+            device_id: {
+                type: Sequelize.INTEGER,
+                references: {
+                    model: 'Devices',
+                    key: 'id',
+                },
             },
             createdAt: {
                 allowNull: false,
@@ -28,6 +39,6 @@ module.exports = {
         });
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('Files');
+        await queryInterface.dropTable('Images');
     },
 };

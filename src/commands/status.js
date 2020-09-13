@@ -1,20 +1,43 @@
 const fq = require('fuzzquire');
 const paths = fq('paths');
-const exif = fq('exif');
 const db = fq('models');
 const fs = require('fs');
 const db_config = fq('config/database');
 const env = process.env.NODE_ENV || 'development';
 
+const print_raw_tables = async (db) => {
+    const tables = await db.sequelize.getQueryInterface().showAllSchemas();
+    _logger.info(`raw tables`);
+    for (table of tables) {
+        const fields = await db.sequelize
+            .getQueryInterface()
+            .describeTable(table.name);
+        _logger.info(`    - table: ${table.name}`);
+        for (key in fields) {
+            _logger.info(
+                `        - ${key}     - ${JSON.stringify(fields[key])}`
+            );
+        }
+    }
+};
+
 module.exports = async (opts) => {
     let num_files = 0;
     let db_size = 0;
+    let num_devices = 0;
     try {
         num_files = await db.Files.count();
+        num_devices = await db.Devices.count();
+        const stats = fs.statSync(db_config[env].storage);
+        //Convert the file size to megabytes
+        db_size = stats['size'] / (1024 * 1024);
+        await print_raw_tables(db);
     } catch (e) {
         console.log(e);
         _logger.error(e);
         process.exit(1);
     }
-    _logger.notice(`${num_files} files known to pixel`);
+    _logger.notice(`files tracked: ${num_files}`);
+    _logger.notice(`devices tracked: ${num_devices}`);
+    _logger.notice(`database size: ${db_size.toFixed(3)} MB`);
 };

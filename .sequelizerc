@@ -3,6 +3,7 @@ const locations = {
     config: path.resolve(__dirname, 'config', 'database.js'),
     'migrations-path': path.resolve(__dirname, 'src', 'migrations'),
     'models-path': path.resolve(__dirname, 'src', 'models'),
+    'seeders-path': path.resolve(__dirname, 'src', 'seeders'),
 };
 
 module.exports = locations;
