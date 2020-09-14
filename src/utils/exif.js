@@ -57,7 +57,7 @@ const get_uuids = async (files) => {
     return uuids;
 };
 
-const handle_file = async (ep, file) => {
+const handle_file = async (ep, file, force) => {
     const metadata = await get_exif(ep, file);
     if (metadata === false) {
         return false;
@@ -68,7 +68,12 @@ const handle_file = async (ep, file) => {
     }
     if (existing_uuid && !uuid.validate(existing_uuid)) {
         _logger.error(`invalid uuid '${existing_uuid}'in file: ${file}`);
-        return false;
+        if (force) {
+            _logger.alert(`overwriting original ImageUniqueID field`);
+        } else {
+            _logger.alert(`use --force to overwrite ImageUniqueID field`);
+            return false;
+        }
     }
     if (!existing_uuid) {
         _logger.debug(`>>>> writing uuid for: ${file}`);
@@ -89,7 +94,7 @@ const handle_file = async (ep, file) => {
     }
 };
 
-const read_write_uuid_info = async (opts) => {
+const read_write_uuid_info = async (opts, force) => {
     const metadata_list = [];
     write_count = 0;
     try {
@@ -100,7 +105,7 @@ const read_write_uuid_info = async (opts) => {
         const pid = await ep.open();
         _logger.info(`exiftool process started as ${pid}`);
         for (file of opts) {
-            const metadata_info = await handle_file(ep, file);
+            const metadata_info = await handle_file(ep, file, force);
             if (metadata_info === false) {
                 // something wrong happened; leave it.
                 continue;

@@ -157,7 +157,8 @@ const handle_files = async (filepaths, flags) => {
 
     // 1. Ensure files have a UUID.
     const { metadata_list, write_count } = await exif.read_write_uuid_info(
-        filepaths
+        filepaths,
+        flags.force
     );
 
     // 2. Ensure files are in files table.
