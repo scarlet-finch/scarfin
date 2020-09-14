@@ -71,9 +71,9 @@ const handle_file = async (ep, file, force) => {
         _logger.error(`invalid uuid '${existing_uuid}'in file: ${file}`);
         if (force) {
             _logger.alert(`overwriting original ImageUniqueID field`);
+            overwrite = true;
         } else {
             _logger.alert(`use --force to overwrite ImageUniqueID field`);
-            overwrite = true;
             return false;
         }
     }
