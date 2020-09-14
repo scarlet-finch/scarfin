@@ -50,8 +50,8 @@ const write_devices = async (metadata_list) => {
     let device_add_count = 0;
     try {
         for (e of metadata_list) {
-            const make = e.metadata.data[0].Make;
-            const model = e.metadata.data[0].Model;
+            const make = e.metadata.data[0].Make || null;
+            const model = e.metadata.data[0].Model || null;
             const serial = e.metadata.data[0].SerialNumber
                 ? e.metadata.data[0].SerialNumber.toString()
                 : null;
