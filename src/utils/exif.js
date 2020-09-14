@@ -66,16 +66,18 @@ const handle_file = async (ep, file, force) => {
     if (existing_uuid) {
         existing_uuid = existing_uuid.replace('uuid:', '');
     }
+    let overwrite = false;
     if (existing_uuid && !uuid.validate(existing_uuid)) {
         _logger.error(`invalid uuid '${existing_uuid}'in file: ${file}`);
         if (force) {
             _logger.alert(`overwriting original ImageUniqueID field`);
         } else {
             _logger.alert(`use --force to overwrite ImageUniqueID field`);
+            overwrite = true;
             return false;
         }
     }
-    if (!existing_uuid) {
+    if (!existing_uuid || overwrite) {
         _logger.debug(`>>>> writing uuid for: ${file}`);
         write_count++;
         const new_uuid = await write_uuid(ep, file);
