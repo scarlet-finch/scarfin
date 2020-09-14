@@ -84,8 +84,8 @@ const write_devices = async (metadata_list) => {
 const maybe_write_image_rows = async (metadata_list) => {
     try {
         for (e of metadata_list) {
-            const make = e.metadata.data[0].Make;
-            const model = e.metadata.data[0].Model;
+            const make = e.metadata.data[0].Make || null;
+            const model = e.metadata.data[0].Model || null;
             const serial = e.metadata.data[0].SerialNumber
                 ? e.metadata.data[0].SerialNumber.toString()
                 : null;
