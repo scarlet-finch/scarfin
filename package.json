@@ -16,6 +16,7 @@
     "prettier": "^2.1.1"
   },
   "dependencies": {
+    "command-line-args": "^5.1.1",
     "dist-exiftool": "^10.53.0",
     "filelink": "^4.1.1",
     "fuzzquire": "^1.0.1",

@@ -2,7 +2,42 @@ const fq = require('fuzzquire');
 const paths = fq('paths');
 const exif = fq('exif');
 const db = fq('models');
+const commandLineArgs = require('command-line-args');
 const Sequelize = require('sequelize');
+
+const parse_args = (argv) => {
+    const defs = [{ name: 'force', defaultValue: false, type: Boolean }];
+    try {
+        const opts = commandLineArgs(defs, {
+            stopAtFirstUnknown: false,
+            partial: true,
+            argv,
+        });
+        opts.argv = opts._unknown || [];
+        opts.files = [];
+        if (opts.argv.length) {
+            if (opts.argv[0] !== '--') {
+                _logger.fatal('unknown arguments');
+                _logger.alert(
+                    'usage: pixel sync [--force] -- <image files or folders>'
+                );
+                _logger.alert(
+                    '   ex: pixel sync -- ~/Pictures ~/Downloads/wallpaper.jpg'
+                );
+                _logger.alert(
+                    '   ex: pixel sync --force -- ~/file-with-existing-unique-id.jpg'
+                );
+                process.exit(1);
+            } else {
+                opts.files = opts.argv.slice(1);
+            }
+        }
+        return opts;
+    } catch (e) {
+        console.log(e);
+        process.exit();
+    }
+};
 
 const write_or_update_files_db = async (uuid, path) => {
     const db_file = await db.Files.findOne({ where: { uuid } });
@@ -152,13 +187,13 @@ const maybe_write_exif_rows = async (metadata_list) => {
     }
 };
 
-const handle_files = async (filepaths, flags) => {
+const handle_files = async (filepaths, force = false) => {
     // We have to do the following:
 
     // 1. Ensure files have a UUID.
     const { metadata_list, write_count } = await exif.read_write_uuid_info(
         filepaths,
-        flags.force
+        force
     );
 
     // 2. Ensure files are in files table.
@@ -183,7 +218,8 @@ const handle_files = async (filepaths, flags) => {
     _logger.success(`synced ${metadata_list.length}/${filepaths.length} files`);
 };
 
-module.exports = async (filepaths, flags) => {
-    filepaths = paths(filepaths);
-    handle_files(filepaths, flags);
+module.exports = async (opts) => {
+    opts = parse_args(opts.argv);
+    filepaths = paths(opts.files);
+    handle_files(filepaths, opts.force);
 };

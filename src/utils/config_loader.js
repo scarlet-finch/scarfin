@@ -15,7 +15,7 @@ try {
         process.exit(1);
     }
     config = Object.assign(config, mod);
-    _logger.debug(`loaded config: ${location}`);
+    _logger.help(`loaded config: ${location}`);
     _logger.debug(JSON.stringify(mod));
     _logger.debug(JSON.stringify(config));
 } catch (e) {

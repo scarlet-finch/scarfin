@@ -1,17 +1,51 @@
 const exiftool = require('node-exiftool');
 const exiftoolBin = require('dist-exiftool');
+const commandLineArgs = require('command-line-args');
 const ep = new exiftool.ExiftoolProcess(exiftoolBin);
 const fs = require('fs');
 const fq = require('fuzzquire');
 const path = fq('paths');
 const db = fq('models');
 
-module.exports = async (opts, flags) => {
-    let file_okay_count = 0;
+const parse_args = (argv) => {
+    const defs = [{ name: 'all', defaultValue: false, type: Boolean }];
     try {
-        opts = path(opts);
+        const opts = commandLineArgs(defs, {
+            stopAtFirstUnknown: false,
+            partial: true,
+            argv,
+        });
+        opts.argv = opts._unknown || [];
+        opts.files = [];
+        if (opts.argv.length) {
+            if (opts.argv[0] !== '--') {
+                _logger.fatal('unknown arguments');
+                _logger.alert(
+                    'usage: pixel check [--all] -- <image files or folders>'
+                );
+                _logger.alert(
+                    '   ex: pixel check -- ~/Pictures ~/Downloads/wallpaper.jpg'
+                );
+                _logger.alert('   ex: pixel check --all');
+                process.exit(1);
+            } else {
+                opts.files = opts.argv.slice(1);
+            }
+        }
+        return opts;
+    } catch (e) {
+        console.log(e);
+        process.exit();
+    }
+};
+
+module.exports = async (opts) => {
+    opts = parse_args(opts.argv);
+    try {
+        const files = path(opts.files);
+        let file_okay_count = 0;
         const pid = await ep.open();
-        for (file of opts) {
+        for (file of files) {
             const metadata = await ep.readMetadata(file, ['c "%.6f"']);
             const primary = metadata.data[0].ImageUniqueID;
             const backup = metadata.data[0].DocumentName;
@@ -27,10 +61,6 @@ module.exports = async (opts, flags) => {
 
             const statuses = `${backup_status} ${db_status} ${file_status}`;
             _logger.debug(`${primary} (${statuses}) - ${file}`);
-            if (flags.metadata) {
-                _logger.notice(`metadata for ${file}`);
-                console.log(metadata.data[0]);
-            }
             if (!primary && backup) {
                 _logger.fatal(`primary uuid missing for: ${file}`);
                 continue;
@@ -63,8 +93,8 @@ module.exports = async (opts, flags) => {
             file_okay_count++;
         }
         ep.close();
-        const msg = `${file_okay_count}/${opts.length} files are ok`;
-        if (file_okay_count === opts.length && opts.length > 0) {
+        const msg = `${file_okay_count}/${files.length} files are ok`;
+        if (file_okay_count === files.length && files.length > 0) {
             _logger.success(msg);
         } else {
             _logger.notice(msg);

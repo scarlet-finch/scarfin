@@ -27,17 +27,15 @@ const copy_date_taken = async () => {
             date_taken: date.toDate(),
         });
     }
-    _logger.notice(`updated ${exifs.length} files`);
+    _logger.success(`updated date taken for ${exifs.length} files`);
 };
 
-module.exports = async (opts, flags) => {
+module.exports = async (opts) => {
     try {
-        if (flags.dateTaken) {
-            await copy_date_taken();
-        }
+        await copy_date_taken();
     } catch (e) {
         console.error(e);
-        _logger.fatal('database error');
+        _logger.fatal('housekeeping error');
         process.exit(1);
     }
 };

@@ -1,88 +1,96 @@
 #! /usr/bin/env node
 'use strict';
-const meow = require('meow');
+const commandLineArgs = require('command-line-args');
 const fq = require('fuzzquire');
 const winston = require('winston');
 const migrate = fq('migrate');
 
-const main = async () => {
-    const cli = meow(
-        `
-    Usage
-      $ pixel <command> -- <files>
-
-    Commands
-      - sync -- <files> - add or update images
-      - check -- <files> - check status of images
-      - status - print overall system status
-
-    Options
-      (nothing here yet)
-
-    Examples
-      $ pixel sync foo/*.jpg
-          success: synced 90 files
-          notice: added 3 new files
-`,
+const parse_args = () => {
+    const defs = [
+        { name: 'command', defaultOption: true, defaultValue: 'help' },
         {
-            flags: {
-                verbose: {
-                    type: 'boolean',
-                    alias: 'v',
-                    default: false,
-                },
-                metadata: {
-                    type: 'boolean',
-                    alias: 'm',
-                    default: false,
-                },
-            },
-        }
-    );
+            name: 'verbose',
+            type: Boolean,
+            defaultValue: [],
+            alias: 'v',
+            lazyMultiple: true,
+        },
+    ];
+    const opts = commandLineArgs(defs, {
+        stopAtFirstUnknown: false,
+        partial: true,
+    });
+    opts.argv = opts._unknown || [];
+    return opts;
+};
 
-    const [command, ...files] = cli.input;
-
+const make_globals = (opts) => {
     let logger;
-    if (cli.flags.verbose) {
-        logger = fq('logger')('debug');
-    } else {
-        logger = fq('logger')('success');
+    switch (opts.verbose.length) {
+        case 0:
+            logger = fq('logger')('success');
+            break;
+        case 1:
+            logger = fq('logger')('help');
+            break;
+        default:
+            logger = fq('logger')('debug');
+            break;
     }
     global._logger = logger;
 
     const config = fq('config_loader');
     global._config = config;
 
+    if (config.help_messages == true && opts.verbose.length === 0) {
+        global._logger = fq('logger')('help');
+    }
+};
+
+const main = async () => {
+    const opts = parse_args();
+    make_globals(opts);
+
+    _logger.help(
+        'help messages are enabled. set `help_messages: false` in config to disable'
+    );
+
     await migrate(); // Apply pending db migrations
 
     const commands = ['sync, check'];
 
-    switch (command) {
+    switch (opts.command) {
         case 'sync':
-            fq('sync')(files, cli.flags);
+            fq('sync')(opts);
             break;
         case 'check':
-            fq('check')(files, cli.flags);
+            fq('check')(opts);
             break;
         case 'status':
-            fq('status')(files, cli.flags);
+            fq('status')(opts);
             break;
         case 'device':
         case 'devices':
-            fq('commands/devices')(files, cli.flags);
+            fq('commands/devices')(opts);
             break;
         case 'tag':
         case 'tags':
-            fq('commands/tags')(files, cli.flags);
+            fq('commands/tags')(opts);
             break;
         case 'housekeep':
-            fq('commands/housekeep')(files, cli.flags);
+        case 'housekeeping':
+            fq('commands/housekeep')(opts);
             break;
         case 'mount':
-            fq('commands/mount')(files, cli.flags);
+            fq('commands/mount')(opts);
+            break;
+        case 'help':
+            _logger.notice(
+                'A flexible image tagger/query tool. Beets for images.'
+            );
             break;
         case 'test':
-            fq('test')(files, cli.flags);
+            fq('test')(opts);
             break;
         default:
             _logger.alert(`unknown command: ${command}`);
