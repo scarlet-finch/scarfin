@@ -1,14 +1,15 @@
 {
-  "name": "pixel",
-  "version": "1.0.0",
+  "name": "pixel-tagger",
+  "version": "0.0.2",
   "description": "## Project structure",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "prettier --write src/**/*.js config/**/*.js src/*.js"
   },
-  "author": "",
+  "author": "Rohitt Vashishtha",
   "license": "MIT",
+  "repository": "https://github.com/aero31aero/pixel",
   "bin": {
     "pixel": "src/index.js"
   },
@@ -19,15 +20,12 @@
     "command-line-args": "^5.1.1",
     "dist-exiftool": "^10.53.0",
     "filelink": "^4.1.1",
-    "fuzzquire": "^1.0.1",
+    "fuzzquire": "^1.0.2",
     "glob": "^7.1.6",
-    "meow": "^7.1.1",
     "moment": "^2.28.0",
     "node-exiftool": "^2.3.0",
-    "piexifjs": "^1.0.6",
     "sequelize": "^6.3.5",
     "sequelize-cli": "^6.2.0",
-    "simple-node-logger": "^18.12.24",
     "sqlite3": "^5.0.0",
     "umzug": "^2.3.0",
     "uuid": "^8.3.0",

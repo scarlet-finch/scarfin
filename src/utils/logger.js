@@ -1,7 +1,3 @@
-// const log = require('simple-node-logger').createSimpleLogger();
-
-// module.exports = log;
-
 const winston = require('winston');
 const logLevels = {
     levels: {
