@@ -94,7 +94,6 @@ module.exports = async (opts, flags) => {
         if (!path.isAbsolute(target)) {
             target = path.resolve(process.cwd(), target);
         }
-        _logger.notice(`mounting on ${target}`);
         db.Files.hasMany(db.Images, { foreignKey: 'uuid' });
         db.Images.belongsTo(db.Files, {
             foreignKey: 'uuid',
@@ -122,6 +121,9 @@ module.exports = async (opts, flags) => {
         }
         if (!opts.dry) {
             await create_links(pairs, target);
+            _logger.success(`mounted on ${target}`);
+        } else {
+            _logger.notice(`dry run completed`);
         }
     } catch (e) {
         console.log(e);

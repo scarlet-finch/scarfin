@@ -3,6 +3,7 @@ const location = path.join(process.env.HOME, '.pixel', 'config.js');
 
 let config = {
     default_utc_offset: '+00:00',
+    help_messages: false,
 };
 
 try {
