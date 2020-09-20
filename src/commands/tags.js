@@ -37,7 +37,6 @@ const parse_args = (argv) => {
             fatal = true;
         } else if (opts.argv.length) {
             const hyphens = opts.argv.indexOf('--');
-            console.log('patse', opts.argv, hyphens);
             if ([-1, 0, opts.argv.length - 1].includes(hyphens)) {
                 _logger.fatal('unknown arguments');
                 fatal = true;

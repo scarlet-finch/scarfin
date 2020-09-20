@@ -24,7 +24,7 @@ const copy_date_taken = async () => {
         const datestring = data.DateTimeOriginal + ' ' + timezone;
         const date = moment(datestring, 'YYYY:MM:DD HH:mm:ss ZZ');
         await image.update({
-            date_taken: date.toDate(),
+            dateTaken: date.toDate(),
         });
     }
     _logger.success(`updated date taken for ${exifs.length} files`);

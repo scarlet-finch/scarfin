@@ -21,12 +21,12 @@ const map = (files) => {
 
         // For now, we shall put all files in folders that are named after their first
         // letter.
-        const name = path.basename(file.File.path);
+        const name = path.basename(file.path);
         const new_path = `${name[0]}/${name}`;
 
         // Let's push this new path to our pairs of paths to link.
         pairs.push({
-            from: file.File.path,
+            from: file.path,
             to: new_path,
         });
     }

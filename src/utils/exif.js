@@ -33,27 +33,34 @@ const get_exif = async (ep, file) => {
     return metadata;
 };
 
-const get_uuids = async (files) => {
+const get_uuids = async (files, strictly_need_uuid = true) => {
     await ep.open();
-    const uuids = [];
+    let uuids = [];
     for (file of files) {
         const metadata = await get_exif(ep, file);
-        if (metadata === false) {
+        if (metadata === false && strictly_need_uuid) {
             _logger.fatal(`no metadata for: ${file}`);
             process.exit(1);
         }
-        let existing_uuid = metadata.data[0].ImageUniqueID.replace('uuid:', '');
-        if (existing_uuid && !uuid.validate(existing_uuid)) {
+        let existing_uuid = metadata.data[0].ImageUniqueID
+            ? metadata.data[0].ImageUniqueID.replace('uuid:', '')
+            : false;
+        if (
+            existing_uuid &&
+            !uuid.validate(existing_uuid) &&
+            strictly_need_uuid
+        ) {
             _logger.fatal(`invalid uuid '${existing_uuid}'in file: ${file}`);
             process.exit(1);
         }
-        if (!existing_uuid) {
+        if (!existing_uuid && strictly_need_uuid) {
             _logger.fatal(`no uuid for: ${file}`);
             process.exit(1);
         }
         uuids.push(existing_uuid);
     }
     await ep.close();
+    uuids = uuids.filter((e) => e !== false); // remove empty uuids
     return uuids;
 };
 

@@ -141,7 +141,7 @@ const maybe_write_image_rows = async (metadata_list) => {
                     uuid: e.uuid,
                 },
                 defaults: {
-                    device_id: device.id,
+                    deviceId: device.id,
                 },
             });
         }

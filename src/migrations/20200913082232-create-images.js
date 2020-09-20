@@ -21,7 +21,7 @@ module.exports = {
             album: {
                 type: Sequelize.STRING,
             },
-            device_id: {
+            deviceId: {
                 type: Sequelize.INTEGER,
                 references: {
                     model: 'Devices',

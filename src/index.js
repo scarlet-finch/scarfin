@@ -150,7 +150,7 @@ const main = async () => {
 
     await migrate(); // Apply pending db migrations
 
-    const help_commands = 'mount'.split(' '); // commmands that have help pages.
+    const help_commands = 'mount info'.split(' '); // commmands that have help pages.
     if (opts.help && !help_commands.includes(opts.command)) {
         console.log();
         console.log(
@@ -186,6 +186,9 @@ const main = async () => {
             break;
         case 'mount':
             fq('commands/mount')(opts);
+            break;
+        case 'info':
+            fq('commands/info')(opts);
             break;
         case 'help':
             console.log(help_text);

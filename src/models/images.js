@@ -16,8 +16,20 @@ module.exports = (sequelize, DataTypes) => {
             uuid: DataTypes.UUID,
             name: DataTypes.STRING,
             album: DataTypes.STRING,
-            device_id: DataTypes.INTEGER,
-            date_taken: DataTypes.DATE,
+            deviceId: DataTypes.INTEGER,
+            dateTaken: {
+                type: DataTypes.DATE,
+                get() {
+                    console.log('HERE', this, this.getDataValue('dateTaken'));
+                    return this.getDataValue('dateTaken');
+                },
+            },
+            virt: {
+                type: DataTypes.VIRTUAL,
+                get() {
+                    return `${this.dateTaken}-${this.uuid}`;
+                },
+            },
         },
         {
             sequelize,

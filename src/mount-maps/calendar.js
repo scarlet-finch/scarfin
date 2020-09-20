@@ -7,12 +7,13 @@ module.exports = {
     map: (files) => {
         const paths = [];
         for (file of files) {
-            const date = moment(file.date_taken);
+            console.log(file);
+            const date = moment(file.dateTaken);
             paths.push({
-                from: file.File.path,
+                from: file.path,
                 to: `${date.year()}/${date.format('MMMM')}/${date.format(
                     'DD'
-                )}/${path.basename(file.File.path)}`,
+                )}/${path.basename(file.path)}`,
             });
         }
         return paths;

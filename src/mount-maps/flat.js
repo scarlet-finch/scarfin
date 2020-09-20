@@ -6,9 +6,9 @@ module.exports = {
     map: (files) => {
         const paths = [];
         for (file of files) {
-            const date = moment(file.date_taken);
+            const date = moment(file.dateTaken);
             paths.push({
-                from: file.File.path,
+                from: file.path,
                 to: `${date.toISOString()}.jpg`,
             });
         }

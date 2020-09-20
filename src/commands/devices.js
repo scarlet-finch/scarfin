@@ -61,7 +61,7 @@ module.exports = async (opts) => {
                 });
                 const image_count = await db.Images.count({
                     where: {
-                        device_id: e.id,
+                        deviceId: e.id,
                     },
                 });
                 _logger.notice(

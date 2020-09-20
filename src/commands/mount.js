@@ -8,13 +8,14 @@ const moment = require('moment');
 const filelink = require('filelink');
 const commandLineArgs = require('command-line-args');
 const mounts = fq('mount-maps');
+const combine = fq('combine');
 
 const print_help = (exit_code = 0) => {
     const usage = `scarfin mount [--all] --map <mount map name> [--dry] <path/to/mount/target> -- <image files or folders>
-           --all : mount all files
-           --dry : log without mounting
-           --map : mounting map to use. run 'scarfin status' to see detected maps.
-       ex: scarfin mount ~/images --all --dry --map calendar`;
+        --all : mount all files
+        --dry : log without mounting
+        --map : mounting map to use. run 'scarfin status' to see detected maps.
+    ex: scarfin mount ~/images --all --dry --map calendar`;
 
     const help = `
     scarfin mount
@@ -140,22 +141,17 @@ module.exports = async (opts, flags) => {
         if (!path.isAbsolute(target)) {
             target = path.resolve(process.cwd(), target);
         }
-        db.Files.hasMany(db.Images, { foreignKey: 'uuid' });
-        db.Images.belongsTo(db.Files, {
-            foreignKey: 'uuid',
-            targetKey: 'uuid',
-        });
-        const selected_files = filepaths.map((e) => {
-            return { '$File.path$': e };
+        const selected_files = filepaths.map((path) => {
+            return { path };
         });
         const where_clause = opts.all
             ? {}
             : { [Sequelize.Op.or]: selected_files };
-        const files = await db.Images.findAll({
+        const files = await db.Files.findAll({
             where: where_clause,
-            include: [db.Files],
         });
-        let pairs = mounts[opts.map].map(files);
+        const images = await combine(files);
+        let pairs = mounts[opts.map].map(images);
         for (e of pairs) {
             const final_path = path.join(target, e.to);
             if (opts.dry) {
