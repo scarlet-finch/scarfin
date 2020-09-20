@@ -19,13 +19,13 @@ const parse_args = (argv) => {
             if (opts.argv[0] !== '--') {
                 _logger.fatal('unknown arguments');
                 _logger.alert(
-                    'usage: pixel sync [--force] -- <image files or folders>'
+                    'usage: scarfin sync [--force] -- <image files or folders>'
                 );
                 _logger.alert(
-                    '   ex: pixel sync -- ~/Pictures ~/Downloads/wallpaper.jpg'
+                    '   ex: scarfin sync -- ~/Pictures ~/Downloads/wallpaper.jpg'
                 );
                 _logger.alert(
-                    '   ex: pixel sync --force -- ~/file-with-existing-unique-id.jpg'
+                    '   ex: scarfin sync --force -- ~/file-with-existing-unique-id.jpg'
                 );
                 process.exit(1);
             } else {

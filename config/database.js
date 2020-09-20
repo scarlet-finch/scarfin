@@ -1,6 +1,6 @@
 const path = require('path');
 
-const db_location = path.join(process.env.HOME, '.pixel');
+const db_location = path.join(process.env.HOME, '.scarfin');
 
 module.exports = {
     development: {

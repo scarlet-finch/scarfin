@@ -48,17 +48,17 @@ const parse_args = (argv) => {
         }
         if (fatal) {
             _logger.alert(
-                'usage: pixel tags [add/remove] <tags> -- <images/folders>'
+                'usage: scarfin tags [add/remove] <tags> -- <images/folders>'
             );
-            _logger.alert('       pixel tags list [--all] [--files] <tags>');
+            _logger.alert('       scarfin tags list [--all] [--files] <tags>');
             _logger.alert(
-                '   ex: pixel tags add wallpapers sunset -- ~/Pictures/wallpapers ~/Downloads/wallpaper.jpg'
+                '   ex: scarfin tags add wallpapers sunset -- ~/Pictures/wallpapers ~/Downloads/wallpaper.jpg'
             );
             _logger.alert(
-                '   ex: pixel tags remove sunset -- ~/Pictures/wallpapers ~/Downloads/wallpaper.jpg'
+                '   ex: scarfin tags remove sunset -- ~/Pictures/wallpapers ~/Downloads/wallpaper.jpg'
             );
-            _logger.alert('   ex: pixel tags list --paths wallpapers');
-            _logger.alert('   ex: pixel tags list --all');
+            _logger.alert('   ex: scarfin tags list --paths wallpapers');
+            _logger.alert('   ex: scarfin tags list --all');
             process.exit(1);
         }
         return opts;

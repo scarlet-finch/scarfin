@@ -21,12 +21,12 @@ const parse_args = (argv) => {
             if (opts.argv[0] !== '--') {
                 _logger.fatal('unknown arguments');
                 _logger.alert(
-                    'usage: pixel check [--all] -- <image files or folders>'
+                    'usage: scarfin check [--all] -- <image files or folders>'
                 );
                 _logger.alert(
-                    '   ex: pixel check -- ~/Pictures ~/Downloads/wallpaper.jpg'
+                    '   ex: scarfin check -- ~/Pictures ~/Downloads/wallpaper.jpg'
                 );
-                _logger.alert('   ex: pixel check --all');
+                _logger.alert('   ex: scarfin check --all');
                 process.exit(1);
             } else {
                 opts.files = opts.argv.slice(1);

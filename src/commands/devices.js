@@ -34,10 +34,12 @@ const parse_args = (argv) => {
             }
         }
         if (fatal) {
-            _logger.alert('usage: pixel devices <command>');
-            _logger.alert('   ex: pixel devices list');
-            _logger.alert('       pixel devices rename <device id> <new name>');
-            _logger.alert('   ex: pixel devices rename 1 sams-camera');
+            _logger.alert('usage: scarfin devices <command>');
+            _logger.alert('   ex: scarfin devices list');
+            _logger.alert(
+                '       scarfin devices rename <device id> <new name>'
+            );
+            _logger.alert('   ex: scarfin devices rename 1 sams-camera');
             process.exit(1);
         }
 
@@ -79,7 +81,7 @@ module.exports = async (opts) => {
         const new_name = opts.new_name;
         if (id === undefined || !new_name) {
             _logger.fatal(`provide id as integer and name as string.`);
-            _logger.fatal(`    $ pixel devices rename 1 new-name`);
+            _logger.fatal(`    $ scarfin devices rename 1 new-name`);
             process.exit(1);
         }
         try {

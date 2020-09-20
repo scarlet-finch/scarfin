@@ -26,11 +26,11 @@ const parse_args = (argv) => {
             if (opts.argv[0] !== '--') {
                 _logger.fatal('unknown arguments');
                 _logger.alert(
-                    'usage: pixel mount [--all] [--dry] <path/to/mount/target> -- <image files or folders>'
+                    'usage: scarfin mount [--all] [--dry] <path/to/mount/target> -- <image files or folders>'
                 );
                 _logger.alert('       --all : mount all files');
                 _logger.alert('       --dry : log without mounting');
-                _logger.alert('   ex: pixel mount ~/images --all --dry');
+                _logger.alert('   ex: scarfin mount ~/images --all --dry');
                 process.exit(1);
             } else {
                 opts.files = opts.argv.slice(1);

@@ -1,7 +1,7 @@
 {
-  "name": "pixel-tagger",
+  "name": "scarfin",
   "version": "0.0.2",
-  "description": "## Project structure",
+  "description": "A flexible image tagger/query tool. Beets for images.",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,9 +9,9 @@
   },
   "author": "Rohitt Vashishtha",
   "license": "MIT",
-  "repository": "https://github.com/aero31aero/pixel",
+  "repository": "https://github.com/scarlet-finch/scarfin",
   "bin": {
-    "pixel": "src/index.js"
+    "scarfin": "src/index.js"
   },
   "devDependencies": {
     "prettier": "^2.1.1"
