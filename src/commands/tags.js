@@ -8,7 +8,7 @@ const commandLineArgs = require('command-line-args');
 
 const parse_args = (argv) => {
     const defs = [
-        { name: 'command', defaultOption: true, defaultValue: 'list' },
+        { name: 'command', defaultOption: true, defaultValue: false },
         { name: 'paths', defaultValue: false, type: Boolean },
         { name: 'all', defaultValue: false, type: Boolean },
     ];
@@ -118,6 +118,10 @@ module.exports = async (opts, flags) => {
                 raw: true,
             });
             tags = pairs.map((e) => e.tag);
+        }
+        if (!tags) {
+            _logger.alert('no tags to list');
+            process.exit();
         }
         for (tag of tags) {
             const pairs = await db.TagPairs.findAll({ where: { tag } });

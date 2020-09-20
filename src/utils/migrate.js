@@ -40,7 +40,9 @@ const migrate_db = async () => {
             );
             // remove examples so we can update them. this ensures examples
             // modified between updates are synced with the ones in user's directory.
-            fs.rmdirSync(path.join(process.env.HOME, '.scarfin', 'examples'), { recursive: true });
+            fs.rmdirSync(path.join(process.env.HOME, '.scarfin', 'examples'), {
+                recursive: true,
+            });
             await umzug.up();
             _logger.success(`database migrated`);
         }
