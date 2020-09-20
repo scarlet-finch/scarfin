@@ -54,14 +54,15 @@ const migrate_db = async () => {
 };
 
 const copy_examples = async () => {
-    const location = path.join(process.env.HOME, '.scarfin', 'examples');
+    const root = path.join(process.env.HOME, '.scarfin');
+    const examples_dir = path.join(root, 'examples');
     try {
-        if (fs.existsSync(location)) {
+        if (fs.existsSync(examples_dir)) {
             return;
         }
-        _logger.alert(`copying examples to: ${location}`);
-        fs.mkdirSync(location);
-        fs.mkdirSync(path.join(location, 'maps'));
+        _logger.alert(`copying examples to: ${examples_dir}`);
+        fs.mkdirSync(examples_dir);
+        fs.mkdirSync(path.join(examples_dir, 'maps'));
 
         const maps_dir = path.join(__dirname, '..', 'mount-maps');
         fs.readdirSync(maps_dir)
@@ -75,10 +76,25 @@ const copy_examples = async () => {
             .forEach((file) => {
                 fs.copyFileSync(
                     path.join(maps_dir, file),
-                    path.join(location, 'maps', file)
+                    path.join(examples_dir, 'maps', file)
                 );
             });
-        fs.mkdirSync(path.join(process.env.HOME, '.scarfin', 'maps'), {
+        const config_path = path.join(
+            __dirname,
+            '..',
+            '..',
+            'config',
+            'default.js'
+        );
+        fs.copyFileSync(
+            config_path,
+            path.join(examples_dir, 'default_config.js')
+        );
+        if (!fs.existsSync(path.join(root, 'config.js'))) {
+            fs.copyFileSync(config_path, path.join(root, 'config.js'));
+        }
+
+        fs.mkdirSync(path.join(root, 'maps'), {
             recursive: true,
         });
     } catch (err) {

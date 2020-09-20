@@ -1,10 +1,8 @@
 const path = require('path');
 const location = path.join(process.env.HOME, '.scarfin', 'config.js');
+const fq = require('fuzzquire');
 
-let config = {
-    default_utc_offset: '+00:00',
-    help_messages: false,
-};
+let config = fq('config/default');
 
 try {
     const mod = require(location);
