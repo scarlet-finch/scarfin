@@ -91,7 +91,7 @@ const help_text = `${get_banner()}
     Now, we can mount your files somewhere and scarfin should do something
     reasonable to show you the kind off powerful stuff that is possible.
 
-        $ scarfin mount /path/to/mount/target --all
+        $ scarfin mount /path/to/mount/target --all --map calendar
 
     Now, you can go to the location where you mounted your images and
     explore around. To unmount, just delete the directory. Your images
@@ -150,7 +150,8 @@ const main = async () => {
 
     await migrate(); // Apply pending db migrations
 
-    if (opts.help) {
+    const help_commands = 'mount'.split(' '); // commmands that have help pages.
+    if (opts.help && !help_commands.includes(opts.command)) {
         console.log();
         console.log(
             '    help pages coming soon. its the wild west for now, cowboy!'

@@ -4,6 +4,7 @@ const db = fq('models');
 const fs = require('fs');
 const db_config = fq('config/database');
 const env = process.env.NODE_ENV || 'development';
+const mounts = fq('mount-maps');
 
 const print_raw_tables = async (db) => {
     const tables = await db.sequelize.getQueryInterface().showAllSchemas();
@@ -46,7 +47,19 @@ module.exports = async (opts) => {
     }
     _logger.notice(`files tracked:    ${num_files}`);
     _logger.notice(`devices tracked:  ${num_devices}`);
+    _logger.notice(`mounting maps:    ${Object.keys(mounts).length}`);
     _logger.notice(`unique tags:      ${num_tags}`);
     _logger.notice(`file:tag pairs:   ${num_tag_pairs}`);
     _logger.notice(`database size:    ${db_size.toFixed(3)} MB`);
+
+    console.log();
+    _logger.notice('mounting maps:');
+    for (key in mounts) {
+        const m = mounts[key];
+        let desc = m.description || 'no description';
+        if (m.firstparty) {
+            desc = `(default) ${desc}`;
+        }
+        _logger.notice(`    ${m.name} - ${desc}`);
+    }
 };
