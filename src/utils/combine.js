@@ -84,10 +84,22 @@ const map_image_info = (info) => {
     return info;
 };
 
-const main = async (files_info) => {
-    const raw_images_info = await get_images_info(files_info);
-    const mapped_images_info = map_image_info(raw_images_info);
-    return mapped_images_info;
+const add_paths = (info, paths) => {
+    info = info.map((e) => {
+        // These are maybe mounted paths.
+        const path_data = paths.find((f) => f.real_path === e.path);
+        e.symlink = path_data.path !== path_data.real_path;
+        e.symlinkPath = path_data.path;
+        return e;
+    });
+    return info;
+};
+
+const main = async (files_info, paths) => {
+    let info = await get_images_info(files_info);
+    info = map_image_info(info);
+    info = add_paths(info, paths);
+    return info;
 };
 
 module.exports = main;

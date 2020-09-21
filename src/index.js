@@ -5,7 +5,9 @@ const fq = require('fuzzquire');
 const winston = require('winston');
 const migrate = fq('migrate');
 
-const commands = 'status check sync tags devices housekeep mount'.split(' ');
+const commands = 'status check sync tags devices housekeep mount info'.split(
+    ' '
+);
 
 // from https://asciiart.website/index.php?art=animals/birds%20(land)
 const bird = String.raw`

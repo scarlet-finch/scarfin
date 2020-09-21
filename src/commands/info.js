@@ -114,8 +114,8 @@ const report_missing = async (files, paths) => {
     }
     let filepaths = files.map((e) => e.path);
     for (e of paths) {
-        if (!filepaths.includes(e)) {
-            _logger.alert(`file not in db: ${e}. skipping`);
+        if (!filepaths.includes(e.real_path)) {
+            _logger.alert(`file not in db: ${e.path}. skipping`);
         }
     }
     return;
@@ -129,7 +129,8 @@ const print_image = (image) => {
         - album:          ${image.album}
         - device:         ${image.device} (${image.deviceId})
         - tags            ${image.tags.join(', ')}
-        - date            ${image.dateTaken.format('llll')}`;
+        - date            ${image.dateTaken.format('llll')}
+        - symlink         ${image.symlink ? image.symlinkPath : false}`;
     console.log(text);
     // TODO figure out how to use _logger instead of console.log.
 };
@@ -140,10 +141,11 @@ module.exports = async (opts) => {
     }
     opts = parse_args(opts.argv);
     try {
-        const paths = path(opts.files);
-        const files = await get_file_info(paths);
+        const paths = path(opts.files, true);
+        const real_paths = paths.map((e) => e.real_path);
+        const files = await get_file_info(real_paths);
         report_missing(files, paths);
-        const images = await combine(files);
+        const images = await combine(files, paths);
         for (image of images) {
             print_image(image);
         }
