@@ -7,7 +7,6 @@ module.exports = {
     map: (files) => {
         const paths = [];
         for (file of files) {
-            console.log(file);
             const date = moment(file.dateTaken);
             paths.push({
                 from: file.path,

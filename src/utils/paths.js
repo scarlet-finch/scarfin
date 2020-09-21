@@ -48,7 +48,7 @@ const get_with_symlinks = (locations) => {
 };
 
 const get_given_paths = (locations) => {
-    get_with_symlinks(locations).map((e) => e.path);
+    return get_with_symlinks(locations).map((e) => e.path);
 };
 
 module.exports = (locations, symlinks = false) => {

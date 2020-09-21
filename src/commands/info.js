@@ -5,6 +5,7 @@ const exif = fq('exif');
 const db = fq('models');
 const combine = fq('combine');
 const Sequelize = require('sequelize');
+const terminalImage = require('terminal-image');
 
 const print_help = (exit_code = 0) => {
     const usage = `scarfin info -- <image files or folders>
@@ -56,7 +57,14 @@ const print_help = (exit_code = 0) => {
 };
 
 const parse_args = (argv) => {
-    const defs = [];
+    const defs = [
+        {
+            name: 'preview',
+            defaultValue: false,
+            type: Boolean,
+            alias: 'p',
+        },
+    ];
     try {
         const opts = commandLineArgs(defs, {
             stopAtFirstUnknown: false,
@@ -121,7 +129,30 @@ const report_missing = async (files, paths) => {
     return;
 };
 
-const print_image = (image) => {
+const get_banner = (
+    col1,
+    col2,
+    width = 50,
+    start = 2,
+    max = process.stdout.columns
+) => {
+    let banner = [];
+    const a = col1.split('\n');
+    const b = col2.split('\n');
+    const lines = Math.max(a.length, b.length);
+    for (let i = 0; i < lines; i++) {
+        const a_str = a[i] || '';
+        let b_str = b[i] || '';
+        if (b_str.length > max - width - start) {
+            b_str = b_str.substring(0, max - width - start - 3) + '...';
+        }
+        let final_str = ' '.repeat(start) + a_str.padEnd(width) + b_str;
+        banner.push(final_str);
+    }
+    return banner.join('\n');
+};
+
+const print_image = async (image, preview = false) => {
     const text = `
     ${image.path}
         - uuid:           ${image.uuid}
@@ -131,6 +162,13 @@ const print_image = (image) => {
         - tags            ${image.tags.join(', ')}
         - date            ${image.dateTaken.format('llll')}
         - symlink         ${image.symlink ? image.symlinkPath : false}`;
+    if (preview) {
+        const rendered_image = await terminalImage.file(image.path, {
+            width: 50,
+        });
+        console.log(get_banner(rendered_image, text));
+        return;
+    }
     console.log(text);
     // TODO figure out how to use _logger instead of console.log.
 };
@@ -146,8 +184,11 @@ module.exports = async (opts) => {
         const files = await get_file_info(real_paths);
         report_missing(files, paths);
         const images = await combine(files, paths);
+        if (opts.preview) {
+            console.log(); // insert empty line
+        }
         for (image of images) {
-            print_image(image);
+            await print_image(image, opts.preview);
         }
     } catch (e) {
         console.error(e);

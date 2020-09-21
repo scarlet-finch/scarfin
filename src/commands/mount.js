@@ -137,11 +137,12 @@ module.exports = async (opts, flags) => {
     opts = parse_args(opts.argv);
     try {
         let target = opts.target;
-        const filepaths = paths(opts.files);
+        let filepaths = paths(opts.files, true);
+        const real_paths = filepaths.map((e) => e.real_path);
         if (!path.isAbsolute(target)) {
             target = path.resolve(process.cwd(), target);
         }
-        const selected_files = filepaths.map((path) => {
+        const selected_files = real_paths.map((path) => {
             return { path };
         });
         const where_clause = opts.all
@@ -150,7 +151,12 @@ module.exports = async (opts, flags) => {
         const files = await db.Files.findAll({
             where: where_clause,
         });
-        const images = await combine(files);
+        if (opts.all) {
+            filepaths = files.map((e) => {
+                return { path: e.path, real_path: e.path };
+            });
+        }
+        const images = await combine(files, filepaths);
         let pairs = mounts[opts.map].map(images);
         for (e of pairs) {
             const final_path = path.join(target, e.to);
