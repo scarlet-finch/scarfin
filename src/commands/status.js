@@ -59,4 +59,11 @@ module.exports = async (opts) => {
         }
         _logger.notice(`    ${m.name} - ${desc}`);
     }
+    return {
+        num_files,
+        db_size,
+        num_devices,
+        num_tags,
+        num_tag_pairs,
+    };
 };
