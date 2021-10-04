@@ -70,7 +70,6 @@ const get_images_info = async (files_info) => {
             ],
             raw: true,
             group: [Sequelize.col('Images.uuid')],
-            logger: console.log,
         });
     } catch (e) {
         console.error(e);

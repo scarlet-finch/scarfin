@@ -75,9 +75,18 @@ module.exports = async (opts, flags) => {
         const uuids = await exif.get_uuids(filepaths);
         for (uuid of uuids) {
             for (tag of opts.tags) {
-                const [val, created] = await db.TagPairs.findOrCreate({
+                const [tag_object, tag_created] = await db.Tags.findOrCreate({
                     where: {
-                        tag,
+                        name: tag,
+                    },
+                    defauls: {
+                        type: 'user-defined',
+                        description: '',
+                    },
+                });
+                const [val, pair_created] = await db.TagPairs.findOrCreate({
+                    where: {
+                        tag: tag_object.id,
                         uuid,
                     },
                 });
@@ -109,21 +118,44 @@ module.exports = async (opts, flags) => {
 
     if (opts.command === 'list') {
         let tags = opts.tags;
+        let pairs;
+        db.TagPairs.belongsTo(db.Tags, {
+            foreignKey: 'tag',
+            targetKey: 'id',
+        });
         if (opts.all) {
-            const pairs = await db.TagPairs.findAll({
+            pairs = await db.TagPairs.findAll({
                 attributes: ['tag', [Sequelize.fn('COUNT', 'tag'), 'count']],
                 group: ['tag'],
+                include: [
+                    {
+                        model: db.Tags,
+                        attributes: ['name', 'description', 'type'],
+                        as: 'Tag',
+                    },
+                ],
                 order: [[Sequelize.literal('count'), 'DESC']],
                 raw: true,
             });
-            tags = pairs.map((e) => e.tag);
+            tags = pairs.map((e) => e['Tag.name']);
         }
         if (!tags) {
             _logger.alert('no tags to list');
             process.exit();
         }
         for (tag of tags) {
-            const pairs = await db.TagPairs.findAll({ where: { tag } });
+            const tag_object = await db.Tags.findOne({
+                where: {
+                    name: tag,
+                },
+            });
+            if (!tag_object) {
+                _logger.alert(`tag '${tag}' doesn't exist`);
+                continue;
+            }
+            const pairs = await db.TagPairs.findAll({
+                where: { tag: tag_object.id },
+            });
             const filtered_uuids = pairs.map((e) => {
                 return e.uuid;
             });
@@ -134,7 +166,12 @@ module.exports = async (opts, flags) => {
                     },
                 },
             });
-            _logger.notice(`${tag} (${files.length} files)`);
+            const description_text = tag_object.description
+                ? `(${tag_object.description}) `
+                : '';
+            _logger.notice(
+                `${tag_object.name} ${description_text}- ${files.length} files`
+            );
             if (opts.paths) {
                 for (file of files) {
                     _logger.notice(`    - ${file.path}`);

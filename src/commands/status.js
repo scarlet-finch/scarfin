@@ -31,10 +31,7 @@ module.exports = async (opts) => {
     try {
         num_files = await db.Files.count();
         num_devices = await db.Devices.count();
-        num_tags = await db.TagPairs.count({
-            distinct: true,
-            col: 'tag',
-        });
+        num_tags = await db.Tags.count();
         num_tag_pairs = await db.TagPairs.count();
         const stats = fs.statSync(db_config[env].storage);
         //Convert the file size to megabytes

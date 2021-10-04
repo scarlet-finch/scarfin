@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     TagPairs.init(
         {
             uuid: DataTypes.UUID,
-            tag: DataTypes.STRING,
+            tag: DataTypes.INTEGER,
         },
         {
             sequelize,
