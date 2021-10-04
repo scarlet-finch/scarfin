@@ -2,6 +2,7 @@ const fq = require('fuzzquire');
 const db = fq('models');
 const Sequelize = require('sequelize');
 const moment = require('moment');
+const fs = require('fs');
 
 // Authoritative file to get combined information on an image from the
 // db using its files info. We should merge data from all tables here.
@@ -24,6 +25,16 @@ const get_images_info = async (files_info) => {
         targetKey: 'uuid',
         sourceKey: 'uuid',
         as: 'Tags',
+    });
+    db.TagPairs.belongsTo(db.Tags, {
+        foreignKey: 'tag',
+        targetKey: 'id',
+    });
+    db.Tags.hasMany(db.TagPairs, {
+        foreignKey: 'id',
+        targetKey: 'tag',
+        sourceKey: 'id',
+        as: 'TagPairs',
     });
     db.Devices.hasMany(db.Images, {
         sourceKey: 'id',
@@ -78,44 +89,51 @@ const get_images_info = async (files_info) => {
         );
         process.exit(1);
     }
-
-    return images;
+    const all_tags = await db.Tags.findAll();
+    return { image_info: images, all_tags };
 };
 
-const map_image_info = (info) => {
-    info = info.map((e) => {
-        if (e['Tags.all'] == null) {
-            e.tags = [];
-        } else {
-            e.tags = e['Tags.all'].split('<separator>');
-            delete e['Tags.all'];
+const map_image_info = (image_info, all_tags) => {
+    image_info = image_info.map((image) => {
+        // Populate tag objects;
+        let tags = [];
+        if (image['Tags.all']) {
+            tags = image['Tags.all'].split('<separator>').map((e) => {
+                const id = parseInt(e);
+                const found_tag = all_tags.find((e) => e.id == id);
+                return found_tag;
+            });
         }
-        e.device = e['Device.name'];
-        e.path = e['File.path'];
-        delete e['File.path'];
+        image.tags = tags;
+        // clean up some props.
+        image.path = image['File.path'];
+        delete image['Tags.all'];
+        delete image['File.path'];
         // 2020-03-07 11:34:36.000 +00:00
-        e.dateTaken = moment(e.dateTaken, 'YYYY-MM-DD hh:mm:ss.SSS ZZ');
-        return e;
+        image.dateTaken = moment(image.dateTaken, 'YYYY-MM-DD hh:mm:ss.SSS ZZ');
+        return image;
     });
-    return info;
+    return image_info;
 };
 
 const add_paths = (info, paths) => {
     info = info.map((e) => {
         // These are maybe mounted paths.
-        const path_data = paths.find((f) => f.real_path === e.path);
-        e.symlink = path_data.path !== path_data.real_path;
-        e.symlinkPath = path_data.path;
+        e.symlink = false;
+        fs.lstat(e.path, function (err, stats) {
+            e.symlink = stats.isSymbolicLink();
+        });
+        e.symlinkPath = e.path;
         return e;
     });
     return info;
 };
 
 const main = async (files_info, paths) => {
-    let info = await get_images_info(files_info);
-    info = map_image_info(info);
-    info = add_paths(info, paths);
-    return info;
+    let { image_info, all_tags } = await get_images_info(files_info);
+    image_info = map_image_info(image_info, all_tags);
+    image_info = add_paths(image_info, paths);
+    return image_info;
 };
 
 module.exports = main;

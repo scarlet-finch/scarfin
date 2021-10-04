@@ -8,7 +8,7 @@ const map = (files) => {
         for (tag of file.tags) {
             pairs.push({
                 from: file.path,
-                to: `${tag}/${path.basename(file.path)}`,
+                to: `${tag.name}/${path.basename(file.path)}`,
             });
         }
     }

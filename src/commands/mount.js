@@ -145,7 +145,7 @@ module.exports = async (opts, flags) => {
         const where_clause = opts.all
             ? {}
             : {
-                  files: {
+                  path: {
                       [Sequelize.Op.in]: real_paths,
                   },
               };

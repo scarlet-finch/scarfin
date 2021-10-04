@@ -101,18 +101,33 @@ module.exports = async (opts, flags) => {
         tag_pairs_count = 0;
         for (uuid of uuids) {
             for (tag of opts.tags) {
-                await db.TagPairs.destroy({
+                const tag_object = await db.Tags.findOne({
                     where: {
-                        tag,
+                        name: tag,
+                    },
+                });
+                if (!tag_object) {
+                    _logger.alert(`tag '${tag}' doesn't exist`);
+                    continue;
+                }
+                const entry = await db.TagPairs.findOne({
+                    where: {
+                        tag: tag_object.id,
                         uuid,
                     },
                 });
+                if (!entry) {
+                    // entry doesn't exist;
+                    _logger.debug(`entry doesn't exist`);
+                } else {
+                    await entry.destroy();
+                }
             }
         }
         _logger.notice(
-            `removed tags: (${opts.tags.join(', ')}) from ${
+            `ensured ${
                 uuids.length
-            } files.`
+            } files don't have the tags: (${opts.tags.join(', ')})`
         );
     }
 

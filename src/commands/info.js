@@ -159,7 +159,7 @@ const print_image = async (image, preview = false) => {
         - name:           ${image.name}
         - album:          ${image.album}
         - device:         ${image.device} (${image.deviceId})
-        - tags            ${image.tags.join(', ')}
+        - tags            ${image.tags.map((e) => e.name).join(', ')}
         - date            ${image.dateTaken.format('llll')}
         - symlink         ${image.symlink ? image.symlinkPath : false}`;
     if (preview) {

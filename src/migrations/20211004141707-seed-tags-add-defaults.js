@@ -7,14 +7,6 @@ module.exports = {
     up: async (queryInterface, Sequelize) => {
         await queryInterface.bulkInsert('Tags', [
             {
-                id: 0,
-                name: 'for-guests',
-                description: 'To show guests who come to visit',
-                type: 'default',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            },
-            {
                 id: 1,
                 name: 'for-social',
                 description: 'To upload on social media',
@@ -42,6 +34,14 @@ module.exports = {
                 id: 4,
                 name: 'to-print',
                 description: 'To print and hang etc',
+                type: 'default',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
+            {
+                id: 5,
+                name: 'for-guests',
+                description: 'To show guests who come to visit',
                 type: 'default',
                 createdAt: new Date(),
                 updatedAt: new Date(),
