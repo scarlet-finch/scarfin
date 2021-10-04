@@ -8,7 +8,7 @@ const moment = require('moment');
 
 const get_images_info = async (files_info) => {
     const uuid_filter = files_info.map((file) => {
-        return { uuid: file.uuid };
+        return file.uuid;
     });
     db.Files.hasMany(db.Images, { foreignKey: 'uuid' });
     db.Images.belongsTo(db.Files, {
@@ -34,46 +34,63 @@ const get_images_info = async (files_info) => {
         targetKey: 'id',
         as: 'Device',
     });
-    const images = await db.Images.findAll({
-        where: {
-            [Sequelize.Op.or]: uuid_filter,
-        },
-        include: [
-            {
-                model: db.Files,
-                attributes: ['path'],
+    let images;
+    try {
+        images = await db.Images.findAll({
+            where: {
+                uuid: {
+                    [Sequelize.Op.in]: uuid_filter,
+                },
             },
-            {
-                model: db.Devices,
-                attributes: ['name', 'id', 'make', 'model', 'serial'],
-                as: 'Device',
-            },
-            {
-                model: db.TagPairs,
-                attributes: [
-                    [
-                        Sequelize.fn(
-                            'group_concat',
-                            Sequelize.col('Tags.tag'),
-                            '<separator>'
-                        ),
-                        'all',
+            include: [
+                {
+                    model: db.Files,
+                    attributes: ['path'],
+                },
+                {
+                    model: db.Devices,
+                    attributes: ['name', 'id', 'make', 'model', 'serial'],
+                    as: 'Device',
+                },
+                {
+                    model: db.TagPairs,
+                    attributes: [
+                        [
+                            Sequelize.fn(
+                                'group_concat',
+                                Sequelize.col('Tags.tag'),
+                                '<separator>'
+                            ),
+                            'all',
+                        ],
                     ],
-                ],
-                group: [Sequelize.col('uuid')],
-                as: 'Tags',
-            },
-        ],
-        raw: true,
-        group: [Sequelize.col('Images.uuid')],
-    });
+                    group: [Sequelize.col('uuid')],
+                    as: 'Tags',
+                },
+            ],
+            raw: true,
+            group: [Sequelize.col('Images.uuid')],
+            logger: console.log,
+        });
+    } catch (e) {
+        console.error(e);
+        _logger.error(
+            'Some SQL plus ORM issue; please report this bug on Github.'
+        );
+        process.exit(1);
+    }
+
     return images;
 };
 
 const map_image_info = (info) => {
     info = info.map((e) => {
-        e.tags = e['Tags.all'].split('<separator>');
-        delete e['Tags.all'];
+        if (e['Tags.all'] == null) {
+            e.tags = [];
+        } else {
+            e.tags = e['Tags.all'].split('<separator>');
+            delete e['Tags.all'];
+        }
         e.device = e['Device.name'];
         e.path = e['File.path'];
         delete e['File.path'];

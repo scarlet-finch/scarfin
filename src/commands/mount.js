@@ -142,12 +142,13 @@ module.exports = async (opts, flags) => {
         if (!path.isAbsolute(target)) {
             target = path.resolve(process.cwd(), target);
         }
-        const selected_files = real_paths.map((path) => {
-            return { path };
-        });
         const where_clause = opts.all
             ? {}
-            : { [Sequelize.Op.or]: selected_files };
+            : {
+                  files: {
+                      [Sequelize.Op.in]: real_paths,
+                  },
+              };
         const files = await db.Files.findAll({
             where: where_clause,
         });

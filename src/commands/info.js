@@ -97,18 +97,18 @@ const get_file_info = async (paths) => {
         const uuids = await exif.get_uuids(paths, false);
         files = await db.Files.findAll({
             where: {
-                [Sequelize.Op.or]: uuids.map((uuid) => {
-                    return { uuid };
-                }),
+                uuid: {
+                    [Sequelize.Op.in]: uuids,
+                },
             },
             raw: true,
         });
     } else {
         files = await db.Files.findAll({
             where: {
-                [Sequelize.Op.or]: paths.map((path) => {
-                    return { path };
-                }),
+                path: {
+                    [Sequelize.Op.in]: paths,
+                },
             },
             raw: true,
         });

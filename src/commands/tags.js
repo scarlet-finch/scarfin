@@ -125,13 +125,13 @@ module.exports = async (opts, flags) => {
         for (tag of tags) {
             const pairs = await db.TagPairs.findAll({ where: { tag } });
             const filtered_uuids = pairs.map((e) => {
-                return {
-                    uuid: e.uuid,
-                };
+                return e.uuid;
             });
             const files = await db.Files.findAll({
                 where: {
-                    [Sequelize.Op.or]: filtered_uuids,
+                    uuid: {
+                        [Sequelize.Op.in]: filtered_uuids,
+                    },
                 },
             });
             _logger.notice(`${tag} (${files.length} files)`);
