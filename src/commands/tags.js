@@ -70,7 +70,12 @@ const parse_args = (argv) => {
 module.exports = async (opts, flags) => {
     opts = parse_args(opts.argv);
     const filepaths = paths(opts.files);
-    const uuids = await exif.get_uuids(filepaths);
+    let uuids;
+    try {
+        uuids = await exif.get_uuids(filepaths);
+    } catch (e) {
+        console.log('ERROR', e);
+    }
     if (opts.command === 'add') {
         const uuids = await exif.get_uuids(filepaths);
         for (uuid of uuids) {

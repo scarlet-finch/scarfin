@@ -144,6 +144,7 @@ const make_globals = (opts) => {
 
 const main = async () => {
     const opts = parse_args();
+    process.env.LC_ALL = 'en_US.UTF-8'; // perl error from our exiftool.
     make_globals(opts);
 
     _logger.help(
@@ -196,7 +197,7 @@ const main = async () => {
             console.log(help_text);
             break;
         case 'test':
-            fq('test')(opts);
+            fq('commands/test')(opts);
             break;
         default:
             _logger.alert(`unknown command: ${command}`);
