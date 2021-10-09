@@ -105,6 +105,7 @@ const map_image_info = (image_info, all_tags) => {
             });
         }
         image.tags = tags;
+        image.tags_raw = image.tags.map((e) => e.name);
         // clean up some props.
         image.path = image['File.path'];
         delete image['Tags.all'];
