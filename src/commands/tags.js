@@ -132,6 +132,6 @@ module.exports = async (opts, flags) => {
                 }
             }
         }
+        return tags; // for testing
     }
-    process.exit(0);
 };

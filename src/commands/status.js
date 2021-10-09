@@ -49,7 +49,7 @@ module.exports = async (opts) => {
     _logger.notice(`file:tag pairs:   ${num_tag_pairs}`);
     _logger.notice(`database size:    ${db_size.toFixed(3)} MB`);
 
-    console.log();
+    _logger.notice('');
     _logger.notice('mounting maps:');
     for (key in mounts) {
         const m = mounts[key];

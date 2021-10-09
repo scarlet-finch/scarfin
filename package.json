@@ -4,7 +4,9 @@
   "description": "A flexible image tagger/query tool. Beets for images.",
   "main": "src/index.js",
   "scripts": {
-    "test": "NODE_ENV=test nyc --all mocha",
+    "pretest": "test/pretest.sh",
+    "test": "NODE_ENV=test nyc --silent --all mocha",
+    "posttest": "NODE_ENV=test nyc report",
     "lint": "prettier --write src/**/*.js config/**/*.js src/*.js test/**/*.js"
   },
   "author": "Rohitt Vashishtha",

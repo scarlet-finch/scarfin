@@ -9,7 +9,7 @@ module.exports = {
     },
     test: {
         dialect: 'sqlite',
-        storage: 'test-database',
+        storage: 'test/test-database',
     },
     production: {
         dialect: 'sqlite',

@@ -5,7 +5,7 @@ const db = fq('models');
 const commandLineArgs = require('command-line-args');
 const Sequelize = require('sequelize');
 
-const parse_args = (argv) => {
+const parse_args = (argv, files) => {
     const defs = [{ name: 'force', defaultValue: false, type: Boolean }];
     try {
         const opts = commandLineArgs(defs, {
@@ -14,7 +14,7 @@ const parse_args = (argv) => {
             argv,
         });
         opts.argv = opts._unknown || [];
-        opts.files = [];
+        opts.files = files || []; // we already pass files for testing.
         if (opts.argv.length) {
             if (opts.argv[0] !== '--') {
                 _logger.fatal('unknown arguments');
@@ -216,10 +216,20 @@ const handle_files = async (filepaths, force = false) => {
     _logger.notice(`updated ${db_update_count} db rows`);
     _logger.notice(`added ${device_add_count} new devices`);
     _logger.success(`synced ${metadata_list.length}/${filepaths.length} files`);
+
+    // return data for testing.
+    return {
+        write_count,
+        db_add_count,
+        db_update_count,
+        device_add_count,
+        metadata_list,
+        filepaths,
+    };
 };
 
 module.exports = async (opts) => {
-    opts = parse_args(opts.argv);
+    opts = parse_args(opts.argv, opts.files);
     filepaths = paths(opts.files);
-    handle_files(filepaths, opts.force);
+    return handle_files(filepaths, opts.force);
 };

@@ -5,13 +5,12 @@ const migrate = fq('migrate');
 const status = fq('commands/status');
 global._logger = fq('logger')('emerg'); // we do not want logging in tests
 
-beforeEach(async () => {
-    // clean the database
-    await db.sequelize.sync({ force: true });
-    await migrate();
-});
-
 describe('database sanity', function () {
+    beforeEach(async () => {
+        // clean the database
+        await db.sequelize.sync({ force: true });
+        await migrate();
+    });
     it('should have 5 tags by default', async function () {
         const status_data = await status();
         assert.strictEqual(status_data.num_tags, 5);
