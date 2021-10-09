@@ -3,6 +3,7 @@ const paths = fq('paths');
 const exif = fq('exif');
 const db = fq('models');
 const Sequelize = require('sequelize');
+const api = fq('api');
 
 const commandLineArgs = require('command-line-args');
 
@@ -11,6 +12,7 @@ const parse_args = (argv) => {
         { name: 'command', defaultOption: true, defaultValue: false },
         { name: 'paths', defaultValue: false, type: Boolean },
         { name: 'all', defaultValue: false, type: Boolean },
+        { name: 'show-unused', defaultValue: false, type: Boolean },
     ];
     try {
         const opts = commandLineArgs(defs, {
@@ -49,7 +51,9 @@ const parse_args = (argv) => {
             _logger.alert(
                 'usage: scarfin tags [add/remove] <tags> -- <images/folders>'
             );
-            _logger.alert('       scarfin tags list [--all] [--files] <tags>');
+            _logger.alert(
+                '       scarfin tags list [--all] [--show-unused] [--files] <tags>'
+            );
             _logger.alert(
                 '   ex: scarfin tags add wallpapers sunset -- ~/Pictures/wallpapers ~/Downloads/wallpaper.jpg'
             );
@@ -77,26 +81,7 @@ module.exports = async (opts, flags) => {
         console.log('ERROR', e);
     }
     if (opts.command === 'add') {
-        const uuids = await exif.get_uuids(filepaths);
-        for (uuid of uuids) {
-            for (tag of opts.tags) {
-                const [tag_object, tag_created] = await db.Tags.findOrCreate({
-                    where: {
-                        name: tag,
-                    },
-                    defauls: {
-                        type: 'user-defined',
-                        description: '',
-                    },
-                });
-                const [val, pair_created] = await db.TagPairs.findOrCreate({
-                    where: {
-                        tag: tag_object.id,
-                        uuid,
-                    },
-                });
-            }
-        }
+        await api.tags.add(opts.tags, uuids);
         _logger.notice(
             `added tags: (${opts.tags.join(', ')}) to ${uuids.length} files.`
         );
@@ -104,31 +89,7 @@ module.exports = async (opts, flags) => {
 
     if (opts.command === 'remove') {
         tag_pairs_count = 0;
-        for (uuid of uuids) {
-            for (tag of opts.tags) {
-                const tag_object = await db.Tags.findOne({
-                    where: {
-                        name: tag,
-                    },
-                });
-                if (!tag_object) {
-                    _logger.alert(`tag '${tag}' doesn't exist`);
-                    continue;
-                }
-                const entry = await db.TagPairs.findOne({
-                    where: {
-                        tag: tag_object.id,
-                        uuid,
-                    },
-                });
-                if (!entry) {
-                    // entry doesn't exist;
-                    _logger.debug(`entry doesn't exist`);
-                } else {
-                    await entry.destroy();
-                }
-            }
-        }
+        await api.tags.remove(opts.tags, uuids);
         _logger.notice(
             `ensured ${
                 uuids.length
@@ -139,53 +100,26 @@ module.exports = async (opts, flags) => {
     if (opts.command === 'list') {
         let tags = opts.tags;
         let pairs;
-        db.TagPairs.belongsTo(db.Tags, {
-            foreignKey: 'tag',
-            targetKey: 'id',
-        });
         if (opts.all) {
-            pairs = await db.TagPairs.findAll({
-                attributes: ['tag', [Sequelize.fn('COUNT', 'tag'), 'count']],
-                group: ['tag'],
-                include: [
-                    {
-                        model: db.Tags,
-                        attributes: ['name', 'description', 'type'],
-                        as: 'Tag',
-                    },
-                ],
-                order: [[Sequelize.literal('count'), 'DESC']],
-                raw: true,
+            tags = await api.tags.list({
+                show_unused: opts['show-unused'],
             });
-            tags = pairs.map((e) => e['Tag.name']);
+            tags = tags.map((e) => e.name);
         }
         if (!tags) {
             _logger.alert('no tags to list');
             process.exit();
         }
         for (tag of tags) {
-            const tag_object = await db.Tags.findOne({
-                where: {
-                    name: tag,
-                },
-            });
-            if (!tag_object) {
-                _logger.alert(`tag '${tag}' doesn't exist`);
-                continue;
-            }
-            const pairs = await db.TagPairs.findAll({
-                where: { tag: tag_object.id },
-            });
-            const filtered_uuids = pairs.map((e) => {
-                return e.uuid;
-            });
+            const uuids = await api.tags.find_files(tag);
             const files = await db.Files.findAll({
                 where: {
                     uuid: {
-                        [Sequelize.Op.in]: filtered_uuids,
+                        [Sequelize.Op.in]: uuids,
                     },
                 },
             });
+            const tag_object = await api.tags.find(tag);
             const description_text = tag_object.description
                 ? `(${tag_object.description}) `
                 : '';
